@@ -1,0 +1,637 @@
+
+{% extends 'base.html' %} 
+{% url 'runModel' as runModel %}
+{% load static %} 
+{% block content %} 
+<meta id="model-data">
+    <div class="col-lg-12" id="runModelDiv">
+        <div class="card">
+            <div class="card-header">
+                Models
+            </div>
+            <div class="card-body card-block"> 
+                    <div class="row form-group">
+                        <div class="col col-md-1">
+                            <label class=" form-control-label">Model</label>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <select name="optModel" id="optModel" onchange="getPrvData()" class="form-control">
+                                <option value="0">Please select</option>
+                                <option value="RF">Random Forest</option>
+                                <option value="XGB">XGBoost</option> 
+                                <option value="MLP">Multi-Layer Perceptron (MLP)</option>
+                                <!-- <option value="GBC">Gradient Boosting</option> -->
+                                <option value="KNN">K Nearest Neighbors (KNN)</option>
+                                <!-- <option value="SVM">Support Machine Vector (SVM)</option>
+                                <option value="BC">Bagging Classifier</option> -->
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <button type="button" class="btn btn-primary btn-sm" style="margin-right: 10px;" onclick="runModel()">Run</button>
+                            <button  class="btn btn-primary btn-sm"    onclick="goNext()" style="margin-right: 10px;" type="button">Next</button>
+                            <a href="{{ pdfFile }}" id="downRpt" download> &nbsp;<i class="fa fa-download" style="font-size: 12px;" title="Export to PDF"></i> </a>&nbsp;<a href="#" onclick="showComment()"> <i class="fa fa-comment" style="font-size: 12px;" title="Add comments"></i></a>
+                            <a style="margin-right:5;" href="#" onclick="showFilename()"> <i class="fa fa-save" style="font-size: 12px;" title="Save chart image"></i></a>
+                        </div>
+                    </div> 
+                    <div class="row form-group">
+                        <div id="divMain" role="tabpanel" aria-labelledby="divMain-tab">    
+                            <nav>
+                                <div class="nav nav-tabs nav-justified" id="nav-tab_1" role="tablist">
+                                    <a class="nav-item nav-link active" onclick="setActiveMethod('1')" id="custom-nav-NT-tab" data-toggle="tab" href="#custom-nav-NT" role="tab" aria-controls="custom-nav-NT"
+                                    aria-selected="false">No Parameters Tuning</a>  
+                                    <a class="nav-item nav-link" onclick="setActiveMethod('2')" id="custom-nav-RS-tab" data-toggle="tab" href="#custom-nav-RS" role="tab" aria-controls="custom-nav-RS"
+                                    aria-selected="false">Random Search</a>  
+                                    <a class="nav-item nav-link" onclick="setActiveMethod('3')" id="custom-nav-GS-tab" data-toggle="tab" href="#custom-nav-GS" role="tab" aria-controls="custom-nav-GS"
+                                    aria-selected="false">Grid Search</a> 
+                                </div>
+                            </nav> 
+                            <div class="tab-content pl-3 pt-2" style="height: 600px;">
+                                <div class="tab-pane fade show active" id="custom-nav-NT" role="tabpanel" aria-labelledby="custom-nav-NT-tab">
+                                    <nav>
+                                        <div class="nav nav-tabs nav-justified" id="nav-tab-NT" role="tablist">
+                                            <a class="nav-item nav-link active" onclick="setActiveTab('1')" id="custom-nav-NT1-tab" data-toggle="tab" href="#custom-nav-NT1" role="tab" aria-controls="custom-nav-NT1"
+                                            aria-selected="false">Summary</a>
+                                            <a class="nav-item nav-link" onclick="setActiveTab('2')"  id="custom-nav-NT2-tab" data-toggle="tab" href="#custom-nav-NT2" role="tab" aria-controls="custom-nav-NT2"
+                                            aria-selected="true">Correlation</a> 
+                                            <a class="nav-item navlink" onclick="setActiveTab('3')"  id="custom-nav-NT3-tab" data-toggle="tab" href="#custom-nav-NT3" role="tab" aria-controls="custom-nav-NT3"
+                                            aria-selected="true">MSA</a> 
+                                            <a class="nav-item nav-link" onclick="setActiveTab('4')"  id="custom-nav-NT4-tab" data-toggle="tab" href="#custom-nav-NT4" role="tab" aria-controls="custom-nav-NT4"
+                                            aria-selected="true">PDP</a> 
+                                            <a class="nav-item nav-link" onclick="setActiveTab('5')"  id="custom-nav-NT5-tab" data-toggle="tab" href="#custom-nav-NT5" role="tab" aria-controls="custom-nav-NT5"
+                                            aria-selected="true">PFI</a> 
+                                           
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content pl-3 pt-2" id="nav-tabContent">
+                                        <div class="tab-pane fade show active" id="custom-nav-NT1" role="tabpanel" aria-labelledby="custom-nav-NT1-tab">
+                                            <div style="height: 50%;overflow:hidden"> 
+                                                <div class="row"> 
+                                                    <div class="col-lg-12">
+                                                        <img id="nt_summary"  src="{{ nt_summary }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-NT2"   role="tabpanel" aria-labelledby="custom-nav-NT2-tab">
+                                            <div style="height: 50%;overflow:hidden"> 
+                                                <div class="row"> 
+                                                    <div class="col-lg-12">
+                                                        <img id="nt_correlation"  src="{{ nt_correlation }}">
+                                                    </div>
+                                                </div> 
+                                            </div>
+                                        </div> 
+                                        <div class="tab-pane fade"  id="custom-nav-NT3" role="tabpanel" aria-labelledby="custom-nav-NT3-tab">
+                                            <div style="height: 50%;overflow:hidden"> 
+                                                <div class="row">           
+                                                    <div class="col-lg-12">
+                                                        <img id="nt_msa"  src="{{ nt_msa }}">
+                                                    </div> 
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-NT4" role="tabpanel" aria-labelledby="custom-nav-NT4-tab">
+                                            <div style="height: 50%;overflow:hidden"> 
+                                                <div class="row">    
+                                                    <div class="col-lg-12">
+                                                        <img id="nt_pdp"  src="{{ nt_pdp }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-NT5" role="tabpanel" aria-labelledby="custom-nav-NT5-tab">
+                                            <div style="height: 50%;overflow:hidden"> 
+                                                <div class="row"> 
+                                                    <div class="col-lg-12">
+                                                        <img id="nt_pfi"  src="{{ nt_pfi }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div> 
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="custom-nav-RS" role="tabpanel" aria-labelledby="custom-nav-RS-tab">
+                                    <nav>
+                                        <div class="nav nav-tabs nav-justified" id="nav-tab-RS" role="tablist">
+                                            <a class="nav-item nav-link active" onclick="setActiveRSTab('1')"  id="custom-nav-RS1-tab" data-toggle="tab" href="#custom-nav-RS1" role="tab" aria-controls="custom-nav-RS1"
+                                            aria-selected="false">Summary</a>
+                                            <a class="nav-item nav-link" onclick="setActiveRSTab('2')"  id="custom-nav-RS2-tab" data-toggle="tab" href="#custom-nav-RS2" role="tab" aria-controls="custom-nav-RS2"
+                                            aria-selected="true">Correlation</a>
+                                            <a class="nav-item navlink" onclick="setActiveRSTab('3')"  id="custom-nav-RS3-tab" data-toggle="tab" href="#custom-nav-RS3" role="tab" aria-controls="custom-nav-RS3"
+                                            aria-selected="true">MSA</a> 
+                                            <a class="nav-item nav-link" onclick="setActiveRSTab('4')"  id="custom-nav-RS4-tab" data-toggle="tab" href="#custom-nav-RS4" role="tab" aria-controls="custom-nav-RS4"
+                                            aria-selected="true">PDP</a> 
+                                            <a class="nav-item nav-link" onclick="setActiveRSTab('5')"  id="custom-nav-RS5-tab" data-toggle="tab" href="#custom-nav-RS5" role="tab" aria-controls="custom-nav-RS5"
+                                            aria-selected="true">PFI</a>  
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content pl-3 pt-2" id="nav-tabContent">
+                                        <div class="tab-pane fade show active" id="custom-nav-RS1" role="tabpanel" aria-labelledby="custom-nav-RS1-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row"> 
+                                                    <div class="col-lg-12">
+                                                        <img id="rs_summary"  src="{{ rs_summary }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-RS2"   role="tabpanel" aria-labelledby="custom-nav-RS2-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row"> 
+                                                    <div class="col-lg-12">
+                                                        <img id="rs_correlation"  src="{{ rs_correlation }}">
+                                                    </div>
+                                                </div> 
+                                            </div>
+                                        </div> 
+                                        <div class="tab-pane fade"  id="custom-nav-RS3" role="tabpanel" aria-labelledby="custom-nav-RS3-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row">           
+                                                    <div class="col-lg-12">
+                                                        <img id="rs_msa"  src="{{ rs_msa }}">
+                                                    </div> 
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-RS4" role="tabpanel" aria-labelledby="custom-nav-RS4-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row">    
+                                                    <div class="col-lg-12">
+                                                        <img id="rs_pdp"  src="{{ rs_pdp }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-RS5" role="tabpanel" aria-labelledby="custom-nav-RS5-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row">    
+                                                    <div class="col-lg-12">
+                                                        <img id="rs_pfi"  src="{{ rs_pfi }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="tab-pane fade"  id="custom-nav-GS" role="tabpanel" aria-labelledby="custom-nav-GS-tab">
+                                    <nav>
+                                        <div class="nav nav-tabs nav-justified" id="nav-tab-GS" role="tablist">
+                                            <a class="nav-item nav-link active" onclick="setActiveGSTab('1')"  id="custom-nav-GS1-tab" data-toggle="tab" href="#custom-nav-GS1" role="tab" aria-controls="custom-nav-GS1"
+                                            aria-selected="false">Summary</a>
+                                            <a class="nav-item nav-link" onclick="setActiveGSTab('2')"  id="custom-nav-GS2-tab" data-toggle="tab" href="#custom-nav-GS2" role="tab" aria-controls="custom-nav-GS2"
+                                            aria-selected="true">Correlation</a> 
+                                            <a class="nav-item navlink" onclick="setActiveGSTab('3')"  id="custom-nav-GS3-tab" data-toggle="tab" href="#custom-nav-GS3" role="tab" aria-controls="custom-nav-GS3"
+                                            aria-selected="true">MSA</a> 
+                                            <a class="nav-item nav-link" onclick="setActiveGSTab('4')"  id="custom-nav-GS4-tab" data-toggle="tab" href="#custom-nav-GS4" role="tab" aria-controls="custom-nav-GS4"
+                                            aria-selected="true">PDP</a> 
+                                            <a class="nav-item nav-link" onclick="setActiveGSTab('5')"  id="custom-nav-GS5-tab" data-toggle="tab" href="#custom-nav-GS5" role="tab" aria-controls="custom-nav-GS5"
+                                            aria-selected="true">PFI</a> 
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content pl-3 pt-2" id="nav-tabContent">
+                                        <div class="tab-pane fade show active" id="custom-nav-GS1" role="tabpanel" aria-labelledby="custom-nav-GS1-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row"> 
+                                                    <div class="col-lg-12">
+                                                        <img id="gs_summary"  src="{{ gs_summary }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-GS2" role="tabpanel"  aria-labelledby="custom-nav-GS2-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row"> 
+                                                    <div class="col-lg-12">
+                                                        <img id="gs_correlation"  src="{{ gs_correlation }}">
+                                                    </div>
+                                                </div> 
+                                            </div>
+                                        </div> 
+                                        <div class="tab-pane fade"  id="custom-nav-GS3" role="tabpanel" aria-labelledby="custom-nav-GS3-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row">           
+                                                    <div class="col-lg-12">
+                                                        <img id="gs_msa"  src="{{ gs_msa }}">
+                                                    </div> 
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-GS4" role="tabpanel" aria-labelledby="custom-nav-GS4-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row">    
+                                                    <div class="col-lg-12">
+                                                        <img id="gs_pdp"  src="{{ gs_pdp }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-nav-GS5" role="tabpanel" aria-labelledby="custom-nav-GS5-tab">
+                                            <div style="height: 50%;overflow:scroll"> 
+                                                <div class="row">    
+                                                    <div class="col-lg-12">
+                                                        <img id="gs_pfi"  src="{{ gs_pfi }}">
+                                                    </div>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>  
+            </div> 
+        </div> 
+    </div>
+   
+    <div id="divComment" title="Add comments" style="display: none;width:70%">
+        <div style="width:100%">
+            
+            <textarea id="txtcomment" rows="5" style="resize: none; border:1px solid black;width:100%;" ></textarea>
+       </div> 
+    </div>
+  
+    <div  title=""  style="display: none;background-color: inherit" id="divWait">
+        <div style="text-align: center;background-color: inherit">Processing request...</div>
+        <div class="progress mb-3"  >                       
+            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="25"
+             aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+    </div>
+    <div style="display: none;margin-left: 5%;margin-top: 25%;width:90%;background-color: inherit" id="divPrg">
+        <div style="text-align: center;background-color: inherit">Processing request...</div>
+        <div class="progress mb-3" >                       
+            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="25"
+             aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+    </div>
+    <div id="divFilename" title="Save chart image" style="display: none;width:70%">
+        <div style="width:100%">
+            
+            <div class="row form-group"> 
+
+                <div class="col-12 col-md-2"> 
+                    File Name : 
+                </div>
+                <div class="col-12 col-md-9"> 
+                    <input type="text" style="border:1px solid black;width:100%;"  id="txtchartFile"/>
+                </div>
+            </div>
+       </div> 
+    </div>
+
+
+{% endblock content %}
+{% block style %} 
+<style>
+    .no-titlebar .ui-dialog-titlebar {
+        display: none;
+    }
+</style>
+{% endblock style %}
+{%  block script %}
+<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'jquery-3.5.1.js' %}"></script>
+<!-- Jquery JS-->
+<script src="{% static 'vendor/jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'dataTables.min.js' %}"></script>
+<script type='text/javascript'> 
+    let divMaintabIndexNumber;
+    let activeTabIdx=1;
+    let activeRSTabIdx=0;
+    let activeGSTabIdx=0;
+    let activeMethodIdx=0;
+    $(document).ready(function () { 
+        
+        $('#liDataV').click(function(){
+            $('#sub_sub_menu').hide();
+        });
+        var zoomin=0;  
+        $('#imgGraph').click(function(){  
+            if(zoomin==0)
+            { 
+                zoomin=1; 
+                $('#imgGraph').css("transform", "scale(2.5)");
+                $('#imgGraph').css('transform-origin','0px 0px'),
+                $('#imgGraph').css({'cursor':'zoom-out'});
+            }
+            else if(zoomin==1)
+            {
+                zoomin=0; 
+               $('#imgGraph').css("transform", "scale(1)");
+               $('#imgGraph').css('transform-origin','0px 0px'),
+                $('#imgGraph').css({'cursor':'zoom-in'});
+            } 
+        }); 
+        //console.log('{{tableHead}}'+' , '+'{{model}}')
+        $("#optModel").val('{{model}}');
+       // $("#divComment").dialog("close"); 
+       // window.addEventListener("unload", function(event) {console.log('hide model');("#divComment").dialog("close");});
+    });
+
+   function setActiveTab(tabIdx){
+    activeTabIdx=tabIdx;
+   }
+
+   function setActiveRSTab(tabIdx){
+    activeRSTabIdx=tabIdx;
+   }
+
+   function setActiveGSTab(tabIdx){
+       console.log('tabIdx inside gs ',tabIdx)
+    activeGSTabIdx=tabIdx;
+   }
+
+
+   function setActiveMethod(tabIdx){
+    console.log('setActiveMethod inside gs ',tabIdx)
+    activeMethodIdx=tabIdx;
+   }
+   
+
+    function showWaitMsg(){  
+       /* $("#divWait").dialog({  
+            dialogClass: "no-titlebar", 
+            width: "70%",   
+            modal: true, 
+            height:150,
+        }); */
+        $("#runModelDiv").hide();
+        $("#divPrg").show(); 
+    }
+    function showComment()
+    {  
+         
+        if(activeMethodIdx==0)
+            activeMethodIdx=1; 
+        lstHeadings={"1":"Summary Plot","2":"Correlation Plot","3":"MSA Plot","4":"PDP Plot","5":"PFI Plot" };
+        divTitle=""
+        if(activeMethodIdx==1){
+            if(activeTabIdx==0){
+                activeTabIdx=1;
+            } 
+            divTitle="Add comments for No Parameters Tuning "+lstHeadings[activeTabIdx];
+            console.log('divTitle is ',divTitle)
+        }
+        else if(activeMethodIdx==2){
+            if(activeRSTabIdx==0){
+                activeRSTabIdx=1;
+            } 
+            
+            divTitle="Add comments for Random Search "+lstHeadings[activeRSTabIdx];
+            console.log('divTitle is ',divTitle)
+        }
+        else if(activeMethodIdx==3){
+            console.log('activeGSTabIdx is ',activeGSTabIdx);
+            if(activeGSTabIdx==0){
+                activeGSTabIdx=1;
+            } 
+            divTitle="Add comments for Grid Search "+lstHeadings[activeGSTabIdx];
+            console.log('divTitle is ',divTitle)
+        }
+        $("#divComment").dialog({   
+            width: "70%",   
+            modal: true,
+            title:divTitle,
+            buttons:             /* Save: function() {
+                $(this).dialog("close");
+                } */ [
+                {
+                    text: "Save",
+                    "class": 'btn btn-primary btn-sm',
+                    click: function() { 
+                        let tabidx=0;
+                        if(activeMethodIdx==1){ 
+                            tabidx=  activeTabIdx;
+                        }
+                        else if(activeMethodIdx==2){ 
+                            tabidx=activeRSTabIdx; 
+                        }
+                        else if(activeMethodIdx==3){ 
+                            tabidx=activeGSTabIdx;                             
+                        }
+                        $.ajax({ 
+                            url: '/saveComments/',
+                            data:{ comments: $('#txtcomment').val(),'modelName':$("#optModel :selected").text(),'method':activeMethodIdx,'outputTab':tabidx  },
+                            dataType: 'json',
+                            success: function (data) {
+                                    if(data.is_taken)
+                                    {
+                                        alert('Comments added successfully.')
+                                    }            
+                            }
+                        }); 
+                        $(this).dialog("close");
+                    }
+                },
+                {
+                    text: "Cancel",
+                    "class": 'btn btn-primary btn-sm',
+                    click: function() {
+                        // Save code here
+                        $(this).dialog("close");
+                    }
+                }
+            ],  
+        }); 
+    }
+  
+    function runModel()
+    {
+        showWaitMsg(); 
+        $("#nt_summary").attr("src",''); 
+        $("#nt_correlation").attr("src",''); 
+        $("#nt_msa").attr("src",''); 
+        $("#nt_pdp").attr("src",''); 
+        $("#nt_pfi").attr("src",''); 
+        $("#rs_summary").attr("src",''); 
+        $("#rs_correlation").attr("src",''); 
+        $("#rs_msa").attr("src",''); 
+        $("#rs_pdp").attr("src",''); 
+        $("#rs_pfi").attr("src",''); 
+        $("#gs_summary").attr("src",''); 
+        $("#gs_correlation").attr("src",''); 
+        $("#gs_msa").attr("src",''); 
+        $("#gs_pdp").attr("src",''); 
+        $("#gs_pfi").attr("src",''); 
+        console.log($('#optModel').val())
+        $.ajax({ 
+            type: "GET",
+            url: '/runpycaret/',
+            data:{ model: $('#optModel').val() },
+            dataType: 'json',
+            success: function (data) {    
+                if(data.is_data){
+                    $("#divPrg").hide(); 
+                    $("#runModelDiv").show(); 
+                    console.log('data.nt_correlation is ',data.nt_correlation);
+                    $("#nt_summary").attr("src",data.nt_summary); 
+                    $("#nt_correlation").attr("src",data.nt_correlation);  
+                    $("#nt_msa").attr("src",data.nt_msa); 
+                    $("#nt_pdp").attr("src",data.nt_pdp); 
+                    $("#nt_pfi").attr("src",data.nt_pfi);  
+                    $("#rs_summary").attr("src",data.rs_summary); 
+                    $("#rs_correlation").attr("src",data.rs_correlation);
+                    $("#rs_msa").attr("src",data.rs_msa); 
+                    $("#rs_pdp").attr("src",data.rs_pdp); 
+                    $("#rs_pfi").attr("src",data.rs_pfi); 
+
+                    $("#gs_summary").attr("src",data.gs_summary); 
+                    $("#gs_correlation").attr("src",data.gs_correlation);  
+                    $("#gs_msa").attr("src",data.gs_msa); 
+                    $("#gs_pdp").attr("src",data.gs_pdp); 
+                    $("#gs_pfi").attr("src",data.gs_pfi); 
+                }
+                      
+            }
+        }); 
+    }
+
+    function selectFirstTab(tabid){ 
+        /* console.log('tabid is ',tabid) 
+        if(tabid=='nav-tab-NT'){
+           // $('#'+tabid+' a[href="#custom-nav-NT1"]').tab('show')
+           let tabIndexNumber = $('#custom-nav-NT a[aria-selected="true"]').index('a[data-toggle="tab"]');
+            console.log('tabIndexNumber is ',tabIndexNumber)
+        }
+        else if(tabid=='nav-tab-RS'){
+           // $('#'+tabid+' a[href="#custom-nav-RS1"]').tab('show')
+           let tabIndexNumber = $('#custom-nav-RS a[aria-selected="true"]').index('a[data-toggle="tab"]');
+            console.log('tabIndexNumber is ',tabIndexNumber)
+        }
+        else if(tabid=='nav-tab-GS'){
+            //$('#'+tabid+' a[href="#custom-nav-GS1"]').tab('show')
+            let tabIndexNumber = $('#custom-nav-GS a[aria-selected="true"]').index('a[data-toggle="tab"]');
+        console.log('tabIndexNumber is ',tabIndexNumber)
+        } */
+    }
+
+    function showFilename()
+    { 
+        let imgPath='',chartType='';
+        if(activeMethodIdx==0)
+            activeMethodIdx=1; 
+        lstHeadings={"1":"Summary Plot","2":"Correlation Plot","3":"MSA Plot","4":"PDP Plot" ,"5":"PFI Plot" };
+        divTitle=""
+        if(activeMethodIdx==1){
+            if(activeTabIdx==0){
+                activeTabIdx=1;
+            } 
+            chartType=lstHeadings[activeTabIdx];
+            divTitle="No Parameters Tuning "+lstHeadings[activeTabIdx];
+            console.log('divTitle is ',divTitle)
+            if(activeTabIdx==1){
+                imgPath=$('#nt_summary').attr('src');
+            }
+            else if(activeTabIdx==2){
+                imgPath=$('#nt_correlation').attr('src');
+            }
+            else if(activeTabIdx==3){
+                imgPath=$('#nt_msa').attr('src');
+            }
+            else if(activeTabIdx==4){
+                imgPath=$('#nt_pdp').attr('src');
+            }
+            else if(activeTabIdx==5){
+                imgPath=$('#nt_pfi').attr('src');
+            }
+        }
+        else if(activeMethodIdx==2){
+            if(activeRSTabIdx==0){
+                activeRSTabIdx=1;
+            } 
+            
+            divTitle="Random Search "+lstHeadings[activeRSTabIdx];
+            chartType=lstHeadings[activeRSTabIdx];
+            if(activeTabIdx==1){
+                imgPath=$('#rs_summary').attr('src');
+            }
+            else if(activeTabIdx==2){
+                imgPath=$('#rs_correlation').attr('src');
+            }
+            else if(activeTabIdx==3){
+                imgPath=$('#rs_msa').attr('src');
+            }
+            else if(activeTabIdx==4){
+                imgPath=$('#rs_pdp').attr('src');
+            }
+            else if(activeTabIdx==5){
+                imgPath=$('#rs_pfi').attr('src');
+            }
+        }
+        else if(activeMethodIdx==3){
+            console.log('activeGSTabIdx is ',activeGSTabIdx);
+            if(activeGSTabIdx==0){
+                activeGSTabIdx=1;
+            } 
+            divTitle="Grid Search "+lstHeadings[activeGSTabIdx];
+            chartType=lstHeadings[activeGSTabIdx];
+            if(activeTabIdx==1){
+                imgPath=$('#gs_summary').attr('src');
+            }
+            else if(activeTabIdx==2){
+                imgPath=$('#gs_correlation').attr('src');
+            }
+            else if(activeTabIdx==3){
+                imgPath=$('#gs_msa').attr('src');
+            }
+            else if(activeTabIdx==4){
+                imgPath=$('#gs_pdp').attr('src');
+            }
+            else if(activeTabIdx==5){
+                imgPath=$('#gs_pfi').attr('src');
+            }
+            
+        }
+        $("#txtchartFile").val(divTitle+'.png');
+        $("#divFilename").dialog({   
+            width: "50%",   
+            modal: true,
+            buttons:             /* Save: function() {
+                $(this).dialog("close");
+                } */ [
+                {
+                    text: "Save",
+                    "class": 'btn btn-primary btn-sm',
+                    click: function() {  
+                        let tabidx=0;
+                        if(activeMethodIdx==1){ 
+                            tabidx=  activeTabIdx;
+                        }
+                        else if(activeMethodIdx==2){ 
+                            tabidx=activeRSTabIdx; 
+                        }
+                        else if(activeMethodIdx==3){ 
+                            tabidx=activeGSTabIdx;                             
+                        }
+                        $.ajax({ 
+                            url: '/saveModelChartImage/',
+                            data:{ 'modelSS':$("#optModel").val(),'imgPath':imgPath, 'chartImg': $('#txtchartFile').val(),'chartType':chartType,'method':activeMethodIdx,'outputTab':tabidx }, 
+                            dataType: 'json',
+                            success: function (data) {
+                                    if(data.is_taken)
+                                    {
+                                        alert('Image saved successfully.')
+                                    }            
+                            }
+                        }); 
+                        $(this).dialog("close");
+                    }
+                },
+                {
+                    text: "Cancel",
+                    "class": 'btn btn-primary btn-sm',
+                    click: function() {
+                        // Save code here
+                        $(this).dialog("close");
+                    }
+                }
+            ],  
+        }); 
+    }
+
+function goNext(){
+    window.location="{% url 'documentation' %}"
+}
+
+</script>
+{% endblock script %}
