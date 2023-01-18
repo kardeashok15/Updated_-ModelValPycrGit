@@ -199,6 +199,9 @@ def saveConfig(request):
 
 def cmpmodels(request):
     try: 
+        gridDttypes=[]
+        result=[]
+        msg=""
         if os.path.exists(savefile_name):
             if os.path.exists(file_path + user_name + "_pyconfig.csv"):
                 df = pd.read_csv(savefile_name, na_values='?') 
@@ -240,14 +243,19 @@ def cmpmodels(request):
                 del df
             else:
                 print('pycaret config does not exist')
+                msg="Please complete data preparation."
         else:
             print('file does not exist')
-        return render(request, 'comparemodels.html',  {'dataTypes': gridDttypes, 'df': result})
+            msg="Please import data."
+        return render(request, 'comparemodels.html',  {'dataTypes': gridDttypes, 'df': result,'msg':msg})
     except Exception as e:
         print('setuppycaret error is ',e) 
 
 def runBestModel(request):
     try: 
+        msg=""
+        gridDttypes=[]
+        result=[]
         if os.path.exists(savefile_name):
             if os.path.exists(file_path + user_name + "_pyconfig.csv"):
                 df = pd.read_csv(savefile_name, na_values='?') 
@@ -311,9 +319,11 @@ def runBestModel(request):
                 del df,dfConfig,dfmodels
             else:
                 print('pycaret config does not exist')
+                msg="Please complete data preparation."
         else:
             print('file does not exist')
-        return render(request, 'runBestpycr.html',  {'dataTypes': gridDttypes, 'df': result})
+            msg="Please import data." 
+        return render(request, 'runBestpycr.html',  {'dataTypes': gridDttypes, 'df': result,'msg':msg})
     except Exception as e:
         print('setuppycaret error is ',e) 
 
