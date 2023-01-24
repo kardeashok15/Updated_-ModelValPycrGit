@@ -205,7 +205,9 @@ def cmpmodels(request):
         if os.path.exists(savefile_name):
             if os.path.exists(file_path + user_name + "_pyconfig.csv"):
                 df = pd.read_csv(savefile_name, na_values='?') 
-                df=df.head(100)
+                # df=df.head(100)
+                ind = np.random.choice(len(df),1000,replace=False)
+                df = df.iloc[ind,:] 
                 dfConfig = pd.read_csv(file_path + user_name + "_pyconfig.csv", na_values='?')
               
                 for index, row in dfConfig.iterrows():    
@@ -226,7 +228,11 @@ def cmpmodels(request):
                     #
                     # ,feature_interaction=row["feature_interaction"] ,feature_ratio=row["feature_ratio"]
                     # ,polynomial_features =row["polynomial_features"],polynomial_degree=row["polynomial_degree"] ,trigonometry_features=row["trigonometry_features"] )
-                    best = compare_models()
+                    try:
+                        best = compare_models()
+                    except Exception as e:
+                        print('compare_models error is ',e) 
+
                     dfmodels = pull()
                     
                     gridDttypes = []
@@ -236,8 +242,10 @@ def cmpmodels(request):
                         gridDttypes.append({'colName': key, 'dataType': value})
                     result = dfmodels.to_json(orient="records")
                     result = json.loads(result)
+                    print('gridDttypes is ',gridDttypes)
+                    # dfmodels.reset_index(level=0, inplace=True)
                     dfmodels.to_csv( file_path + user_name + "_comparemodels.csv", index=True, encoding='utf-8')
-                    dfmodels.reset_index(level=0, inplace=True)
+                    # 
                     print('df is ',dfmodels) 
                     del dfmodels
                 del df
@@ -256,12 +264,14 @@ def runBestModel(request):
         msg=""
         gridDttypes=[]
         result=[]
+        lendf=""
         if os.path.exists(savefile_name):
-            if os.path.exists(file_path + user_name + "_pyconfig.csv"):
-                df = pd.read_csv(savefile_name, na_values='?') 
-                
-                dfConfig = pd.read_csv(file_path + user_name + "_pyconfig.csv", na_values='?')
+            dfcnt = pd.read_csv(savefile_name)
+            lendf=len(dfcnt)
+            print(str(lendf))
+            if os.path.exists(file_path + user_name + "_pyconfig.csv"):           
                 dfmodels = pd.read_csv(file_path + user_name + "_comparemodels.csv")
+               
                 dfmodels.columns.values[0] = "modelSN"
                 gridDttypes = []
                 dttypes = dict(dfmodels.dtypes)
@@ -270,72 +280,32 @@ def runBestModel(request):
                     gridDttypes.append({'colName': key, 'dataType': value})
                 result = dfmodels.to_json(orient="records")
                 result = json.loads(result)
-                # bestModel=dfcomparemodels.loc[0][0]
-                # for index, row in dfConfig.iterrows():    
-                #     print('row["normalize"] is ',   row["normalize"]  )               
-                # # clf=setup(data = df, target = 'status', train_size = 0.7,html=False,silent=True,normalize = False, transformation = False )
-                #     clf=setup(data = df, target = 'status', html=False,silent=True,           
-                #      train_size=row["train_size"], categorical_imputation=eval("'" +row["categorical_imputation"] +"'"),
-                #       numeric_imputation =eval("'"+row["numeric_imputation"]+"'"),ignore_features =eval(row["ignore_features"])
-                #       ,normalize =row["normalize"] ,normalize_method=eval("'"+ row["normalize_method"] +"'"),
-                #       remove_outliers=row["remove_outliers"] ,outliers_threshold =row["outliers_threshold"],
-                #     remove_multicollinearity =row["remove_multicollinearity"],multicollinearity_threshold=row["multicollinearity_threshold"],
-                #      feature_interaction=row["feature_interaction"] ,feature_ratio=row["feature_ratio"]
-                #     ,polynomial_features =row["polynomial_features"],polynomial_degree=row["polynomial_degree"] ,trigonometry_features=row["trigonometry_features"] 
-                #     ,fix_imbalance=row["fix_imbalance"]
-                #     )
-                #     #  transform_target =row["transform_target"], not working  transform_target_method=eval("'"+row["transform_target_method"]+"'"
-                #     best = create_model(bestModel)
-                    
-                #     path=os.path.join(BASE_DIR, plot_dir_view) #root_path+"demo_picture" #  you can change the path 
-                     
-                #     plobj=plot_model(best, plot = 'auc', save = path)
-                #     print('plobj is ',plobj)
-                #     if os.path.exists(path+"\\"+ user_name+'_AUC.png'):
-                #         os.remove(path+"\\"+ user_name+'_AUC.png')
-                #     os.rename(path+"\\AUC.png" ,path+"\\"+ user_name+'_AUC.png')
+                   
 
-                #     plot_model(best, plot = 'confusion_matrix', save = path)
-                #     if os.path.exists(path+"\\"+ user_name+'_Confusion Matrix.png'):
-                #         os.remove(path+"\\"+ user_name+'_Confusion Matrix.png')
-                #     os.rename(path+"\\Confusion Matrix.png" ,path+"\\"+ user_name+'_Confusion Matrix.png')
-                    
-                #     plot_model(best, plot = 'feature', save = path)
-                #     if os.path.exists(path+"\\"+ user_name+'_Feature Importance.png'):
-                #         os.remove(path+"\\"+ user_name+'_Feature Importance.png')
-                #     os.rename(path+"\\Feature Importance.png" ,path+"\\"+ user_name+'_Feature Importance.png')
-                     
-                    
-                #     if os.path.exists(path+"\\"+ user_name+'_pdp.png'):
-                #         os.remove(path+"\\"+ user_name+'_pdp.png')
-                #     if os.path.exists(path+"\\PDP pdp.html"):
-                #         os.remove(path+"\\PDP pdp.html")
-                #     if os.path.exists(path+"\\"+ user_name+'_pdp.html'):
-                #         os.remove(path+"\\"+ user_name+'_pdp.html')
-                #     interpret_model(best, plot = 'pdp',save=path)
-                #     os.rename(path+"\\PDP pdp.html",path+"\\"+ user_name+'_pdp.html')
-                #     htmltopng(user_name+'_pdp.html',user_name+'_pdp')
-
-                del df,dfConfig,dfmodels
+                del dfmodels
             else:
                 print('pycaret config does not exist')
                 msg="Please complete data preparation."
         else:
             print('file does not exist')
             msg="Please import data." 
-        return render(request, 'runBestpycr.html',  {'dataTypes': gridDttypes, 'df': result,'msg':msg})
+        return render(request, 'runBestpycr.html',  {'dataTypes': gridDttypes, 'df': result,'msg':msg,'lendf':lendf})
     except Exception as e:
         print('setuppycaret error is ',e) 
+        print(traceback.print_exc())
 
 def runSelectedModel(request):
      
     try: 
-        model =request.GET.get('model', 'False')  
+        model =request.GET.get('model', 'False') 
+        dataSize=request.GET.get('dataSize', '1000') 
         print('model selected is ',model)
+        print('dataSize is ',dataSize)
         if os.path.exists(savefile_name):
             if os.path.exists(file_path + user_name + "_pyconfig.csv"):
                 df = pd.read_csv(savefile_name, na_values='?') 
-                
+                ind = np.random.choice(len(df),int(dataSize),replace=False)
+                df = df.iloc[ind,:]
                 dfConfig = pd.read_csv(file_path + user_name + "_pyconfig.csv", na_values='?')
                  
                 bestModel=model
@@ -354,7 +324,7 @@ def runSelectedModel(request):
                     ,fix_imbalance=row["fix_imbalance"]
                     )
                     #  transform_target =row["transform_target"], not working  transform_target_method=eval("'"+row["transform_target_method"]+"'"
-                    best = create_model(bestModel)
+                    best = create_model(bestModel) 
                     plotOutput(best,bestModel,"Test") 
                     # context={'clsrpt':plot_dir_view+'\\'+ user_name+ '_classification_report_'+bestModel+'_Test.png',
                     # 'auc':plot_dir_view+'\\'+ user_name+ '_ROCAUC_'+bestModel+'_Test.png',
@@ -382,17 +352,19 @@ def updateParams(request):
         library =request.GET.get('library', 'scikit-learn')
         algo =request.GET.get('algo', 'None')
         autobetter =request.GET.get('autobetter', 'False')
+        dataSize=request.GET.get('dataSize', '1000') 
         print('nitr is ',nitr)
         if os.path.exists(savefile_name):
             if os.path.exists(file_path + user_name + "_pyconfig.csv"):
                 df = pd.read_csv(savefile_name, na_values='?') 
-                
+                ind = np.random.choice(len(df),int(dataSize),replace=False)
+                df = df.iloc[ind,:]
                 dfConfig = pd.read_csv(file_path + user_name + "_pyconfig.csv", na_values='?')
                  
                 bestModel=model
                 
                 for index, row in dfConfig.iterrows():    
-                    print('row["normalize"] is ',   row["normalize"]  )               
+                    # print('row["normalize"] is ',   row["normalize"]  )               
                 # clf=setup(data = df, target = 'status', train_size = 0.7,html=False,silent=True,normalize = False, transformation = False )
                     clf=setup(data = df, target = 'status', html=False,silent=True,           
                      train_size=row["train_size"], categorical_imputation=eval("'" +row["categorical_imputation"] +"'"),
@@ -632,12 +604,15 @@ def showPycrOutputs(request):
         ty=request.GET['ty']                 
         print('bestModel is ',bestModel) 
         # ty="Test"#request.Get.get('type', 'False')
-        summaryNm,rocaucNm,correlationNm ,pdpNm,pfiNm,msaNm="NA.png","NA.png","NA.png","NA.png","NA.png","NA.png"
+        summaryNm,rocaucNm,featureNm,correlationNm ,pdpNm,pfiNm,msaNm="NA.png","NA.png","NA.png","NA.png","NA.png","NA.png","NA.png"
         if os.path.exists(plot_dir_view+"\\"+ user_name+'_summary_'+bestModel+'_'+ ty+ '.png'):
             summaryNm=user_name+'_summary_'+bestModel+'_'+ ty+ '.png'
         
         if os.path.exists(plot_dir_view+"\\"+ user_name+'_ROCAUC_'+bestModel+'_'+ ty+ '.png'):
             rocaucNm=user_name+'_ROCAUC_'+bestModel+'_'+ ty+ '.png'
+
+        if os.path.exists(plot_dir_view+"\\"+ user_name+'_Feature_Importance_'+bestModel+'_'+ ty+ '.png'):
+            featureNm=user_name+'_Feature_Importance_'+bestModel+'_'+ ty+ '.png'
 
         if os.path.exists(plot_dir_view+"\\"+ user_name+'_correlation_'+bestModel+'_'+ ty+ '.png'):
             correlationNm=user_name+'_correlation_'+bestModel+'_'+ ty+ '.png'
@@ -651,14 +626,14 @@ def showPycrOutputs(request):
         if os.path.exists(plot_dir_view+"\\"+ user_name+'_pdp_'+bestModel+'_'+ ty+ '.png'):
             msaNm=user_name+ '_msa_'+bestModel+'_'+ ty+ '.png'
 
-        context={'bestModel':modelNm,'clsrpt':'\\'+plot_dir_view+'\\'+ user_name+ '_classification_report_'+bestModel+'_'+ ty+ '.png',
+        context={'bestModel':modelNm,'modelSS':bestModel,'clsrpt':'\\'+plot_dir_view+'\\'+ user_name+ '_classification_report_'+bestModel+'_'+ ty+ '.png',
                  'auc':'\\'+plot_dir_view+'\\'+ rocaucNm,
                  'cnfmtrx':'\\'+plot_dir_view+'\\'+ user_name+ '_Confusion_Matrix_'+bestModel+'_'+ ty+ '.png',
                  'calibration':'\\'+plot_dir_view+'\\'+ user_name+ '_Calibration_'+bestModel+'_'+ ty+ '.png',
                  'lift':'\\'+plot_dir_view+'\\'+ user_name+ '_Lift_'+bestModel+'_'+ ty+ '.png',
                  'gain':'\\'+plot_dir_view+'\\'+ user_name+ '_Gain_'+bestModel+'_'+ ty+ '.png',
                  'ks':'\\'+plot_dir_view+'\\'+ user_name+ '_KS_'+bestModel+'_'+ ty+ '.png',
-                 'features':'\\'+plot_dir_view+'\\'+ user_name+ '_Feature_Importance_'+bestModel+'_'+ ty+ '.png',
+                 'features':'\\'+plot_dir_view+'\\'+ featureNm,
                  'summary':'\\'+plot_dir_view+'\\'+ summaryNm,
                  'correlation':'\\'+plot_dir_view+'\\'+correlationNm,
                  'pdp':'\\'+plot_dir_view+'\\'+pdpNm,
