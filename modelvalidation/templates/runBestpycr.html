@@ -1,5 +1,18 @@
 {% extends 'base.html' %} 
 {% load static %} 
+{% block style}
+<style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+{% endblock style}
 {% block content %}
 <div style="margin-left:auto;">  
     <form method="post" enctype="multipart/form-data">      
@@ -10,7 +23,20 @@
                             <div class="card-header">
                                 Run Model
                             </div>
-                            <div class="card-body card-block">  
+                            <div class="card-body card-block"> 
+                                <div class="row" style="margin-bottom: 5px;">
+                                    <div class="col-12 col-md-2" style="max-width:10%;">
+                                        Data Size:
+                                    </div>
+                                    <div class="col-lg-2"  style="max-width:12%;"> 
+                                        <input  type="number" style="border:1px solid black;width:100%;text-align: right; padding-right: 5px;" value="{{lendf}}" id="txtDatasize"/>
+                                    </div>
+                                    <div class="col-12 col-md-4" >  
+                                        <button  class="btn btn-primary btn-sm"    onclick="shoeTune()" style="margin-left: 10px;" type="button">Tune Model</button>
+                                        <button  class="btn btn-primary btn-sm"    onclick="runModel()" style="margin-left: 10px;" type="button">Run Model</button>
+                                    </div>
+                                </div>
+                                
                                 <div class="table-responsive table--no-card m-b-40">
                                     <table id='csvData' class="table table-borderless table-striped table-earning">
                                         <thead>
@@ -55,10 +81,7 @@
                                 </div> 
                             </div>
                             <div class="card-footer"> 
-                                <div class="row" style="display: flex; justify-content: flex-end">  
-                                    <button  class="btn btn-primary btn-sm"    onclick="shoeTune()" style="margin-left: 10px;" type="button">Tune Model</button>
-                                    <button  class="btn btn-primary btn-sm"    onclick="runModel()" style="margin-left: 10px;" type="button">Run Model</button>
-                                </div>
+                              
                             </div>
                             <div class="card-footer"> 
                                 <div class="row" style="display: flex; justify-content: flex-start">  
@@ -178,7 +201,7 @@
            showWaitMsg()
            $.ajax({ 
                 url: '/runSelectedModel/',
-                data:{'model':selModel},
+                data:{'model':selModel,'dataSize':$('#txtDatasize').val()},
                 dataType: 'json',
                 success: function (data) {
                         console.log(data.run+' test')
