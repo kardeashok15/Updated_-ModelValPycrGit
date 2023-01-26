@@ -202,6 +202,7 @@ def cmpmodels(request):
         gridDttypes=[]
         result=[]
         msg=""
+        print('pycaret vesrion is ',pycaret.__version__)
         if os.path.exists(savefile_name):
             if os.path.exists(file_path + user_name + "_pyconfig.csv"):
                 df = pd.read_csv(savefile_name, na_values='?') 
@@ -213,7 +214,7 @@ def cmpmodels(request):
                 for index, row in dfConfig.iterrows():    
                     print('row["normalize"] is ',   row["normalize"]  )               
                 # clf=setup(data = df, target = 'status', train_size = 0.7,html=False,silent=True,normalize = False, transformation = False )
-                    clf=setup(data = df, target = 'status', html=False,silent=True,           
+                    clf=setup(data = df, target = 'status', html=False,silent=True,   session_id=None,        
                      train_size=row["train_size"], categorical_imputation=eval("'" +row["categorical_imputation"] +"'"),
                       numeric_imputation =eval("'"+row["numeric_imputation"]+"'"),ignore_features =eval(row["ignore_features"])
                       ,normalize =row["normalize"] ,normalize_method=eval("'"+ row["normalize_method"] +"'"),
