@@ -258,6 +258,8 @@ def cmpmodels(request):
         return render(request, 'comparemodels.html',  {'dataTypes': gridDttypes, 'df': result,'msg':msg})
     except Exception as e:
         print('setuppycaret error is ',e) 
+        print('stacktrace is ',traceback.print_exc()) 
+
 
 def runBestModel(request):
     try: 
